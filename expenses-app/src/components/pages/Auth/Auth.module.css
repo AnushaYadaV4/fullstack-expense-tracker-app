@@ -1,0 +1,50 @@
+form{
+    display: flex;
+    flex-direction: column;
+    width: 30%;
+    margin: 10% auto;
+    padding: 4%;
+    border-radius: 10px;
+    border: 2px solid  rgb(0, 136, 141);
+}
+
+
+form input{
+    padding: 1.5%;
+    margin: 2% 0;
+}
+
+form h2{
+    margin: 0 auto;
+}
+
+form button{
+    padding: 2%;
+    width: 5rem;
+    margin: auto;
+    margin-top: 5%;
+    font-size: 17px;
+    background-color: rgba(37, 37, 224, 0.397);
+    border-radius: 8px;
+}
+
+.toggleButton
+{
+    background-color: transparent;
+    border-color: transparent;
+    width: 15rem;
+}
+
+.error_tag{
+    display: flex;
+    justify-content: center;
+}
+.add_form {
+    background: #ffffff;
+    box-shadow: 20px 20px 60px whitesmoke, -20px -20px 60px whitesmoke;
+    
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    height: 60vh;
+  }
