@@ -22,6 +22,7 @@ exports.signup = async (req, res) => {
       // Check if the user already exists
       const existingUser = await UserAuth.findOne({ where: { email } });
       if (existingUser) {
+        console.log("USER ALREADY EXISTS")
         return res.status(400).json({ error: 'User already exists' });
       }
   
@@ -54,27 +55,46 @@ exports.login = async (req, res) => {
     try {
       // Check if the user exists
       const user = await UserAuth.findOne({ where: { email } });
+      console.log("USERRR",user);
       if (!user) {
-        return res.status(400).json({ error: 'Invalid credentials' });
+        return res.status(400).json({ error: 'User does not exists' });
       }
   
       // Check if the password is correct
       const isPasswordValid = await bcrypt.compare(password, user.password);
       if (!isPasswordValid) {
         return res.status(400).json({ error: 'Invalid credentials' });
-      }
-  
-      // Generate a JWT token
+      }else{
+         // Generate a JWT token
       const token = generateToken(user);
   
       // Return the token
-      res.json({ token });
+      const userToken=token;
+      //res.json({ token });
+      return res.status(200).json({ success:true,message: 'User logged in successfully' });
+
+
+      }
+  
+     
     } catch (error) {
       console.error(error);
       res.status(500).json({ error: 'Server error' });
     }
   };
 
+
+  exports.getSignupDetails=async(req,res,next)=>{
+    try {
+      const signUpsDetails = await UserAuth.findAll();
+      console.log("signup details",signUpsDetails)
+      res.json(signUpsDetails);
+    } catch (error) {
+      console.error('Error retrieving sign-up details:', error);
+      res.status(500).json({ error: 'Failed to retrieve sign-up details' });
+    }
+
+  }
 
 
 

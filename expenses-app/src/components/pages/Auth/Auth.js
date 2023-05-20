@@ -1,26 +1,39 @@
-import React, {  useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import classes from "./Auth.module.css";
-//import { useHistory } from "react-router-dom";
-//import { Route } from "react-router-dom";
-//import ForgetPassword from "./ForgetPassword";
+
 import useHttp from "../hook/useHttp";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { authAction } from "../../../store/auth-reducer";
 import Button from 'react-bootstrap/Button';
 import axios from 'axios';
 
 
 
+
 const Auth = () => {
   const [isLogin, setIsLogin] = useState(true);
-  const [authDetails,setAuthDetails]=useState();
-  const enteredNameRef=useRef();
+  const [authDetails, setAuthDetails] = useState();
+  const [userData, setUserData] = useState([]);
+
+
+
+  const userMail = useSelector((state) => state.auth.useremail);
+  console.log("USER MAIL", userMail)
+
+  const enteredNameRef = useRef();
   const enteredEmailRef = useRef();
   const enteredPassRef = useRef();
   const enteredConfPassRef = useRef();
-  //const history = useHistory();
-  const { error, sendRequest } = useHttp();
-  const dispatch=useDispatch()
+  const dispatch = useDispatch()
+
+
+
+  useEffect(() => {
+    axios.get('http://localhost:5000/getSignupDetails').then(arr => setUserData(arr.data));
+
+  }, []);
+  console.log("USER data", userData);
+
   const toggleAuthHandler = (event) => {
     event.preventDefault();
     setIsLogin(!isLogin);
@@ -29,7 +42,7 @@ const Auth = () => {
   const submitHandler = async (event) => {
     event.preventDefault();
     try {
-      const enteredName=enteredEmailRef.current.value;
+      const enteredName = enteredEmailRef.current.value;
       const enteredEmail = enteredEmailRef.current.value;
       const enteredPass = enteredPassRef.current.value;
       const enteredConfPass = !isLogin
@@ -37,15 +50,15 @@ const Auth = () => {
         : null;
 
       const authObj = {
-        name:enteredName,
+        name: enteredName,
         email: enteredEmail,
         password: enteredPass,
-        
+
         returnSecureToken: true,
       };
 
       if (isLogin) {
-        const resData = (res) => {
+       /* const resData = (res) => {
           dispatch(authAction.getExpenseToken(res.data.idToken))
           dispatch(authAction.setUserEmail(enteredEmail))
           //history.replace("/welcome");
@@ -54,26 +67,54 @@ const Auth = () => {
           enteredEmailRef.current.value = "";
           enteredPassRef.current.value = "";
         };
+        */
+        console.log("USER DATA",userData)
 
-        axios.post('http://localhost:5000/login', authObj).then(arr => setAuthDetails(arr.data));
-        alert("successfully login");
 
-        console.log(authDetails);
+        userData.map(userDetails => {
+          console.log("----------------------------------")
+          console.log("userDetails", userDetails)
+          console.log("userNAME",userDetails.name)
+          console.log("userEmail",userDetails.name)
 
+          console.log("userpassword",userDetails.password)
+          console.log("entered email",enteredEmail)
+          console.log("entered name",enteredName)
+          console.log("entered password",enteredPass)
+
+
+          if(enteredName!=userDetails.name && enteredEmail != userDetails.email && enteredPass!=userDetails.password) {
+            enteredNameRef.current.value = "";
+
+            enteredEmailRef.current.value = "";
+            enteredPassRef.current.value = "";
+            console.log("Please enter valid credentials")
+
+            
+
+            axios.post('http://localhost:5000/login', authObj).then(arr => setAuthDetails(arr.data));
+            alert("successfully login");
+          }else if(enteredName==userDetails.name && enteredEmail == userDetails.email && enteredPass==userDetails.password){
+            axios.post('http://localhost:5000/login', authObj).then(arr => setAuthDetails(arr.data));
+            console.log("successfully login");
+          
+
+            
+          }
+        })
 
         
+      
+
+        
+        //console.log(authDetails);
+
+
+
 
       } else {
-
-       /* const existingUser =data.email
-        console.log("EMAIL",existingUser);
-      if (existingUser) {
-        alert("User already exist!!")
-      }*/
-
-
         if (
-          enteredName.trim().length===0 ||
+          enteredName.trim().length === 0 ||
           enteredEmail.trim().length === 0 ||
           enteredPass.trim().length === 0 ||
           enteredConfPass.trim().length === 0
@@ -81,47 +122,54 @@ const Auth = () => {
           alert("All fields are mandatory");
         } else if (enteredPass !== enteredConfPass) {
           alert("password doesnot match");
-        } 
-        
-        
-        else if (
+        }else if (
           enteredPass === enteredConfPass &&
           enteredEmail.trim().length > 0 &&
           enteredPass.trim().length > 0 &&
-          enteredName.trim().length >0 &&
           enteredConfPass.trim().length > 0
         ) {
           const resData = (res) => {
             console.log(res);
-            enteredNameRef.current.value="";
             enteredEmailRef.current.value = "";
             enteredPassRef.current.value = "";
             enteredConfPassRef.current.value = "";
             alert("New Account created successfully");
-           
             setIsLogin(true);
           };
 
-          axios.post('http://localhost:5000/signup', authObj).then(arr => setAuthDetails(resData));
           
 
 
-         
+          
         }
+
+
+        else if (enteredEmail.trim().length > 0) {
+
+
+          userData.map(userDetails => {
+            //console.log("userDetails", userDetails)
+            if (enteredEmail === userDetails.email || enteredName===userDetails.name || enteredPass===userDetails.password) {
+              alert("User already exists!! Please select another Email ")
+              enteredNameRef.current.value = "";
+              enteredEmailRef.current.value = "";
+              enteredPassRef.current.value = "";
+              enteredConfPassRef.current.value = "";
+            }
+          })
+        }
+
+        axios.post('http://localhost:5000/signup', authObj).then(arr => setAuthDetails(arr.data));
+
+
+        
       }
     } catch (err) {
       console.log(err.message);
     }
   };
 
-  /*const forgetpasswordhandler = (event) => {
-    event.preventDefault();
-    history.push("/forget_pass");
-  };
-  <Route path="/forget_pass">
-    <ForgetPassword />
-  </Route>;
-  */
+
 
   return (
     <React.Fragment>
