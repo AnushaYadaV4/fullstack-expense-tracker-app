@@ -1,0 +1,43 @@
+.card{
+    border-radius: 100px;
+    box-shadow: 0 1px 8px #d8121240;
+    width:40vw;
+    align-items: center;
+    
+    
+}
+
+.form-card{
+
+        background-color: rgb(172, 136, 19);
+        border-radius: 12px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+        padding-right: 28px;
+        padding-left: 28px;
+        margin-bottom: 24px;
+        font-family: "Open Sans";
+        margin-left: 12px;
+        margin-right: 12px;
+        font-size: 18px;
+        color: #334155;
+        text-align: center;
+        
+      }
+
+      .bg-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        font-family: "Open Sans";
+        background-color: #472b89;
+        min-height: 20vh;
+        max-width: 60vw;
+        border-radius: 40px;
+        color: white;
+        margin: auto;
+        
+        
+      }
+      

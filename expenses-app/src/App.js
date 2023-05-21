@@ -1,26 +1,31 @@
 import './App.css';
-import Auth from './components/pages/Auth/Auth';
-//import {BrowserRouter as Router, Route,Routes} from 'react-router-dom';
-//import { Routes, Route } from 'react-router-dom';
-import { Routes, Route } from "react-router-dom"
-
-
-
+import Login from './components/pages/login/Login';
+import SignUp from './components/pages/signup/SignUp';
+import ExpensesForm from './components/pages/expenses/ExpensesForm';
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import { useState } from 'react';
 
 function App() {
+
+  const [ user, setLoginUser] = useState({})
   return (
     <div className="App">
-      <Routes>
-        <Route path="/" element={ <Auth/> } />
-    
-      </Routes>
-     
-     
-     
-      </div>
-
-      
-    
+      <Router>
+        <Switch>
+          <Route exact path="/">
+            {
+              user ? <ExpensesForm/> : <Login setLoginUser={setLoginUser}/>
+            }
+          </Route>
+          <Route path="/login">
+            <Login setLoginUser={setLoginUser}/>
+          </Route>
+          <Route path="/signup">
+            <SignUp />
+          </Route>
+        </Switch>
+      </Router>
+    </div>
   );
 }
 

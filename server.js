@@ -16,8 +16,10 @@ var http = require('http');
 
 const sequelize=require('./helper/database');
 const authActionsRoutes=require('./routes/auth');
+const expenseActionRoutes=require('./routes/expenses');
 
 app.use(authActionsRoutes);
+app.use(expenseActionRoutes)
 
 sequelize
 .sync()
