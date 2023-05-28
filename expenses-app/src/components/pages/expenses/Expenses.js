@@ -1,3 +1,4 @@
+
 import { Fragment } from 'react';
 import './UserExpenses.css';
 
@@ -5,7 +6,8 @@ import './UserExpenses.css';
 import Card from './Card';
 
 
-const UserExpenses=(prop)=>{
+const Expenses=(prop)=>{
+    console.log("IM CALLINGGGGGGGGGGGGGGGGGGGGGGGGGGG");
     console.log("ITEMS",prop.items);
     return(
         
@@ -44,4 +46,4 @@ const UserExpenses=(prop)=>{
     )
 }
 
-export default UserExpenses;
+export default Expenses;

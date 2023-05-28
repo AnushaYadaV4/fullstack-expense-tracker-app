@@ -1,11 +1,17 @@
-import React, { useState } from "react"
-import "./SignUp.css"
-import axios from "axios"
-import { useHistory } from "react-router-dom"
+import React, { useState } from "react";
+import "./SignUp.css";
+import axios from "axios";
+import { useHistory } from "react-router-dom";
+import { authAction } from "../../../store/auth-reducer";
+import { useSelector } from "react-redux";
+
 
 const SignUp = () => {
 
     const history = useHistory()
+    const token=useSelector((state)=>state.auth.token)
+    console.log("getting signup token",token);
+
 
     const [ user, setUser] = useState({
         name: "",
@@ -25,7 +31,7 @@ const SignUp = () => {
     const register = () => {
         const { name, email, password, reEnterPassword } = user
         if( name && email && password && (password === reEnterPassword)){
-            axios.post("http://localhost:5000/signup", user)
+            axios.post("http://localhost:5000/signup",user)
             .then( res => {
                 console.log("RES",res)
                 console.log("DATAAAA",res.data.message)

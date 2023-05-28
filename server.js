@@ -10,16 +10,23 @@ const bodyParser = require('body-parser');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-const userauth = require('./models/UserAuth');
+const User = require('./models/users');
+
+
+const UserExpenses=require('./models/userexpenses');
 var http = require('http');
 
 
 const sequelize=require('./helper/database');
-const authActionsRoutes=require('./routes/auth');
+const authActionsRoutes=require('./routes/user');
 const expenseActionRoutes=require('./routes/expenses');
+
 
 app.use(authActionsRoutes);
 app.use(expenseActionRoutes)
+
+User.hasMany(UserExpenses);
+UserExpenses.belongsTo(User);
 
 sequelize
 .sync()

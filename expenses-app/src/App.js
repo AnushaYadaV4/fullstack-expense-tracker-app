@@ -4,6 +4,7 @@ import SignUp from './components/pages/signup/SignUp';
 import ExpensesForm from './components/pages/expenses/ExpensesForm';
 import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 import { useState } from 'react';
+import Expenses from './components/pages/expenses/Expenses';
 
 function App() {
 
@@ -12,7 +13,7 @@ function App() {
     <div className="App">
       <Router>
         <Switch>
-          <Route exact path="/">
+          <Route exact path="/expenses">
             {
               user ? <ExpensesForm/> : <Login setLoginUser={setLoginUser}/>
             }
@@ -20,7 +21,7 @@ function App() {
           <Route path="/login">
             <Login setLoginUser={setLoginUser}/>
           </Route>
-          <Route path="/signup">
+          <Route path="/">
             <SignUp />
           </Route>
         </Switch>

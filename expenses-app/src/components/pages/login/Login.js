@@ -1,11 +1,18 @@
 import React, {useState} from "react"
 import "./login.css"
 import axios from "axios"
-import { useHistory } from "react-router-dom"
+import { useHistory } from "react-router-dom";
+import { useDispatch,useSelector } from "react-redux";
+
+import { authAction } from "../../../store/auth-reducer";
+import SignUp from "../signup/SignUp";
 
 const Login = ({ setLoginUser}) => {
 
-    const history = useHistory()
+    const history = useHistory();
+    const dispatch=useDispatch()
+    const token=useSelector((state)=>state.auth.token)
+console.log("getting token",token)
 
     const [ user, setUser] = useState({
         email:"",
@@ -21,12 +28,27 @@ const Login = ({ setLoginUser}) => {
     }
 
     const login = () => {
-        axios.post("http://localhost:5000/login", user)
-        .then(res => {
-            alert(res.data.message)
-            setLoginUser(res.data.user)
-            history.push("/")
-        })
+        
+        const { email, password } = user
+        if(email && password){
+            axios.post("http://localhost:5000/login", user)
+            .then(res => {
+                dispatch(authAction.getExpenseToken(res.data.token))
+        dispatch(authAction.setUserEmail(email))
+                alert(res.data.message)
+                console.log("response data",res.data)
+                console.log("uff token",res.data.token);
+                localStorage.setItem('token',res.data.token);
+                setLoginUser(res.data.user)
+                history.push("/expenses")
+            })
+
+        }else{
+            console.log("invalid")
+            alert("please enter valid credentials");
+        }
+
+       
     }
 
     return (
@@ -36,7 +58,7 @@ const Login = ({ setLoginUser}) => {
             <input type="password" name="password" value={user.password} onChange={handleChange}  placeholder="Enter your Password" ></input>
             <div className="button" onClick={login}>Login</div>
             <div>or</div>
-            <div className="button" onClick={() => history.push("/signup")}>Sign up</div>
+            <div className="button" onClick={() => history.push("/")}>Sign up</div>
         </div>
     )
 }
