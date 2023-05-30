@@ -1,6 +1,10 @@
 const express=require('express');
 const cors=require('cors');
 const app = express();
+
+const dotenv = require('dotenv');
+dotenv.config();
+
 app.use(cors({
     origin:"*"
 }))
@@ -14,19 +18,27 @@ const User = require('./models/users');
 
 
 const UserExpenses=require('./models/userexpenses');
+const Order = require('./models/orders');
+
 var http = require('http');
 
 
 const sequelize=require('./helper/database');
+
 const authActionsRoutes=require('./routes/user');
 const expenseActionRoutes=require('./routes/expenses');
+const purchaseRoutes = require('./routes/purchase')
 
 
 app.use(authActionsRoutes);
 app.use(expenseActionRoutes)
+app.use('/purchase', purchaseRoutes)
 
 User.hasMany(UserExpenses);
 UserExpenses.belongsTo(User);
+
+User.hasMany(Order);
+Order.belongsTo(User);
 
 sequelize
 .sync()

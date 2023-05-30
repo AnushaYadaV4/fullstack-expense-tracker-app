@@ -10,18 +10,13 @@ import "./ExpensesForm.css";
 import { useHistory } from "react-router-dom";
 import { authAction } from '../../../store/auth-reducer';
 import Expenses from './Expenses';
+import Button from "react-bootstrap/esm/Button";
+
 
 
 const ExpensesForm = () => {
 
-  const expns = [
-    { id: 1, amount: 100, category: 'Austria', description: "something" },
-    { id: 2, amount: 100, category: 'Austria', description: "something" },
 
-    { id: 3, amount: 100, category: 'Austria', description: "something" },
-
-
-  ];
   const history = useHistory()
 
   const [expenses, setExpenses] = useState([]);
@@ -34,14 +29,72 @@ const ExpensesForm = () => {
   const token = localStorage.getItem('token');
   console.log("TOKENNN", token);
 
-
-
-
-
-
   const enteredAmountRef = useRef();
   const enteredDesRef = useRef();
   const enteredCatRef = useRef();
+
+
+
+  function loadScript(src) {
+    return new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = src;
+      script.onload = () => {
+        resolve(true);
+      };
+      script.onerror = () => {
+        resolve(false);
+      };
+      document.body.appendChild(script);
+    });
+  }
+
+  const displayRazorpay = async () => {
+    const res = await loadScript(
+      "https://checkout.razorpay.com/v1/checkout.js"
+    );
+
+    if (!res) {
+      alert("Razorpay SDK failed to load. Are you online?");
+      return;
+    }
+
+    const response = await axios.get("http://localhost:5000/purchase/premiummembership", { headers: { 'Authorization': token } });
+    console.log("RESPONSEEEEEE", response)
+
+    if (!response) {
+      alert("Server error. Are you online?");
+      return;
+    }
+
+    console.log("ORDER IDDDD", response.data.order.id);
+
+    var options = {
+      "key": response.data.key_id,
+      "order_id": response.data.order.id,
+      "handler": async function (response) {
+        await axios.post("http://localhost:5000/purchase/updatetransactionstatus", {
+          order_id: options.order_id,
+          payment_id: response.razorpay_payment_id
+        }, { headers: { 'Authorization': token } })
+
+        alert("You are a Premium user now");
+
+      }
+    };
+
+    const rzp1 = new window.Razorpay(options);
+    rzp1.open();
+    rzp1.on('payment.failed', function (response) {
+      console.log(response);
+      alert("something went wrong")
+
+    })
+
+
+
+  }
+
 
   useEffect(() => {
     console.log("inside token", token);
@@ -112,10 +165,6 @@ const ExpensesForm = () => {
         };
 
         axios.post(`http://localhost:5000/editexpenses/${isEditId}`, expenseObj, { headers: { 'Authorization': token } }).then(arr => setExpenses(arr.data));
-
-
-
-
       }
     }
 
@@ -123,8 +172,6 @@ const ExpensesForm = () => {
     enteredDesRef.current.value = "";
     enteredCatRef.current.value = "";
   };
-
-
 
 
 
@@ -149,6 +196,8 @@ const ExpensesForm = () => {
           <label htmlFor="description">Description</label>
           <input ref={enteredDesRef} type="text" id="description"></input>
           <button onClick={addExpenseHandler}>Submit</button>
+          <button onClick={displayRazorpay} id='rzp-button1' type="button" class="btn btn-warning premiumbutton">Premium Membership</button>
+
           <div className="button" onClick={() => history.push("/login")} >Logout</div>
 
         </form>
@@ -180,13 +229,6 @@ const ExpensesForm = () => {
               />
             );
           })}
-
-
-
-
-
-
-
       </section>
 
     </Fragment>
