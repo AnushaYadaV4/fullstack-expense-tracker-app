@@ -28,11 +28,13 @@ const sequelize=require('./helper/database');
 const authActionsRoutes=require('./routes/user');
 const expenseActionRoutes=require('./routes/expenses');
 const purchaseRoutes = require('./routes/purchase')
+const premiumFeatureRoutes=require('./routes/premiumFeature');
 
 
 app.use(authActionsRoutes);
-app.use(expenseActionRoutes)
-app.use('/purchase', purchaseRoutes)
+app.use(expenseActionRoutes);
+app.use('/purchase', purchaseRoutes);
+app.use('/premium',premiumFeatureRoutes);
 
 User.hasMany(UserExpenses);
 UserExpenses.belongsTo(User);

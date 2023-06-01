@@ -1,12 +1,12 @@
 const User = require('../models/users');
-const Expense = require('../models/expenses');
+const Expense = require('../models/userexpenses');
 const sequelize = require('../helper/database');
 const e = require('express');
 
 const getUserLeaderBoard = async (req, res) => {
     try{
         const leaderboardofusers = await User.findAll({
-            attributes: ['id', 'name',[sequelize.fn('sum', sequelize.col('expenses.expenseamount')), 'total_cost'] ],
+            attributes: ['id', 'name',[sequelize.fn('sum', sequelize.col('userexpenses.amount')), 'total_cost'] ],
             include: [
                 {
                     model: Expense,

@@ -8,16 +8,22 @@ import Card from './Card';
 import classes from "./Auth.module.css";
 import "./ExpensesForm.css";
 import { useHistory } from "react-router-dom";
-import { authAction } from '../../../store/auth-reducer';
 import Expenses from './Expenses';
 import Button from "react-bootstrap/esm/Button";
+import ShowingLeaderBoard from '../leaderboard/ShowingLeaderBoard';
+import { leaderboardAction } from '../../../store/leaderboard-reducer';
 
 
 
 const ExpensesForm = () => {
 
+  //const {setShowComponent}=prop
 
-  const history = useHistory()
+  const history = useHistory();
+  const [showComponent, setShowComponent] = useState(false);
+  const [leaderboardArray, setLeaderboardArray] = useState([])
+
+  const [isPremium, setIsPremium] = useState(false);
 
   const [expenses, setExpenses] = useState([]);
   const [isEditId, setIsEditId] = useState(null);
@@ -34,8 +40,17 @@ const ExpensesForm = () => {
   const enteredCatRef = useRef();
 
 
+  const parseJwt = (token) => {
+    var base64Url = token.split('.')[1];
+    var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function (c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join(''));
 
-  function loadScript(src) {
+    return JSON.parse(jsonPayload);
+  }
+
+function loadScript(src) {
     return new Promise((resolve) => {
       const script = document.createElement("script");
       script.src = src;
@@ -80,6 +95,8 @@ const ExpensesForm = () => {
 
         alert("You are a Premium user now");
 
+
+
       }
     };
 
@@ -89,16 +106,27 @@ const ExpensesForm = () => {
       console.log(response);
       alert("something went wrong")
 
+      //localStorage.setItem('ispremiumuser',true);
+      //setIsPremium(false)
+
+
+
     })
 
+}
 
-
-  }
-
-
-  useEffect(() => {
+useEffect(() => {
     console.log("inside token", token);
     console.log("getting expenses")
+
+    const decodeToken = parseJwt(token);
+    console.log("DECODE TOKEN", decodeToken);
+    const ispremiumuser = decodeToken.ispremiumuser;
+    console.log("IS PREMIUM USER", ispremiumuser);
+    if (ispremiumuser) {
+      setIsPremium(true);
+    }
+
     axios.get('http://localhost:5000/getexpenses', { headers: { "Authorization": token } })
       .then(arr => {
         console.log("ARRRRRR", arr)
@@ -118,11 +146,7 @@ const ExpensesForm = () => {
     setIsEditId(data.id);
   };
 
-
-
-
-
-  const deleteButtonHandler = (id) => {
+const deleteButtonHandler = (id) => {
     axios.delete(`http://localhost:5000/deleteexpense/${id}`, { headers: { 'Authorization': token } }).then(arr => setExpenses(arr.data))
   }
 
@@ -154,6 +178,9 @@ const ExpensesForm = () => {
           dispatch(expenseAction.addingNewExpense(expenseObjWithId));
         };
         console.log("POST TOKEN", token)
+
+
+
         axios.post('http://localhost:5000/addexpense', expenseObj, { headers: { 'Authorization': token } }).then(arr => { setExpenses(arr.data) });
 
 
@@ -175,7 +202,27 @@ const ExpensesForm = () => {
 
 
 
-  return (
+
+  useEffect(() => {
+    axios.get("http://localhost:5000/premium/showLeaderBoard", { headers: { "Authorization": token } })
+      .then(userLeaderBoardArray => {
+        console.log("ARRRRRR", userLeaderBoardArray)
+        dispatch(leaderboardAction.leaderboardData(userLeaderBoardArray.data))
+        setLeaderboardArray(userLeaderBoardArray.data)
+        //setExpenses(arr.data.)
+      })
+
+  }, [dispatch]);
+
+  
+
+  const showLeaderboard = () => {
+    setShowComponent(true);
+    //history.push("/leaderboard")
+
+
+  }
+ return (
     <Fragment>
       <div>
 
@@ -196,7 +243,9 @@ const ExpensesForm = () => {
           <label htmlFor="description">Description</label>
           <input ref={enteredDesRef} type="text" id="description"></input>
           <button onClick={addExpenseHandler}>Submit</button>
-          <button onClick={displayRazorpay} id='rzp-button1' type="button" class="btn btn-warning premiumbutton">Premium Membership</button>
+          {isPremium ? <h3 className='premium-user'>You are a premium user</h3> : <button onClick={displayRazorpay} id='rzp-button1' type="button" class="btn btn-warning premiumbutton">Buy Premium</button>}
+
+          <button onClick={showLeaderboard} type="button" class="btn btn-warning premiumbutton">Show Leaderboard</button>
 
           <div className="button" onClick={() => history.push("/login")} >Logout</div>
 
@@ -231,7 +280,22 @@ const ExpensesForm = () => {
           })}
       </section>
 
-    </Fragment>
+      {showComponent ? <section className='bg-container'>
+        <h2>Leader Board</h2>
+
+        {Array.from(leaderboardArray).map((obj) => {
+          return (
+            <ShowingLeaderBoard
+              key={Math.random()}
+              items={obj}
+
+            />
+          );
+        })
+        }
+      </section> : " "}
+
+</Fragment>
   )
 }
 

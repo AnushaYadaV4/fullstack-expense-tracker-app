@@ -62,6 +62,15 @@
   background-color: rgb(128, 0, 0);
   color: white;
 }
+.premium-user{
+  background-color: rgb(217, 240, 8);
+  font-weight: bold;
+  padding: 10px;
+  margin: 10px;
+  border-radius: 10px;
+  color: rgb(255, 0, 0);
+  font-family: 'Times New Roman', Times, serif;
+}
 
 
 
