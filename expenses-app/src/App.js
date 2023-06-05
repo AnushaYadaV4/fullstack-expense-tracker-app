@@ -7,18 +7,24 @@ import { useState } from 'react';
 import { useSelector } from 'react-redux';
 import Expenses from './components/pages/expenses/Expenses';
 import ShowingLeaderBoard from './components/pages/leaderboard/ShowingLeaderBoard';
+import ForgotPassword from './components/pages/forgotPassword/ForgotPassword';
 
 function App() {
-    const leaderBoardArray=useSelector((state)=>state.leaderBoard.leaderboardArr);
-    console.log("LBR",leaderBoardArray)
+    //const leaderBoardArray=useSelector((state)=>state.leaderBoard.leaderboardArr);
+    //console.log("LBR",leaderBoardArray)
 
 
-  const [ user, setLoginUser] = useState({})
+  const [ user, setLoginUser] = useState(false)
   //const [showComponent,setShowComponent]=useState(false);
+  console.log("USERRRR",user)
 
   return (
     <div className="App">
+
+    
+      
       <Router>
+
         <Switch>
 
       
@@ -28,33 +34,26 @@ function App() {
             }
           </Route>
 
-         {/* <Route exact path="/leaderboard">
-            {console.log("ROUTE LEADER BOARD ARRA",leaderBoardArray)}
-            {
-              
-              showComponent? Array.from(leaderBoardArray).map((obj) => {
-                console.log("OBJECT",obj)
-                return (
-                  <ShowingLeaderBoard
-                    key={Math.random()}
-                    items={obj}
-                  
-                  />
-                );
-              }) :""}
-          </Route>
-            */}
+       
            
           
 
           <Route path="/login">
             <Login setLoginUser={setLoginUser}/>
           </Route>
+
+          
+          <Route path="/forgotpassword">
+            <ForgotPassword/>
+          </Route>
+          
           <Route path="/">
             <SignUp />
           </Route>
+
+
         </Switch>
-      </Router>
+          </Router>
     </div>
   );
 }

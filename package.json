@@ -13,6 +13,7 @@
   "author": "Anusha",
   "license": "ISC",
   "dependencies": {
+    "@sendgrid/mail": "^7.7.0",
     "bcrypt": "^5.1.0",
     "cors": "^2.8.5",
     "dotenv": "^16.0.3",
@@ -21,7 +22,9 @@
     "mysql2": "^3.3.1",
     "razorpay": "^2.8.6",
     "react-router-dom": "^5.2.0",
-    "sequelize": "^6.31.1"
+    "sequelize": "^6.31.1",
+    "sib-api-v3-sdk": "^8.5.0",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "concurrently": "^8.0.1",

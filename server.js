@@ -15,10 +15,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const User = require('./models/users');
-
-
 const UserExpenses=require('./models/userexpenses');
 const Order = require('./models/orders');
+const Forgotpassword = require('./models/forgotPassword');
+
 
 var http = require('http');
 
@@ -29,18 +29,23 @@ const authActionsRoutes=require('./routes/user');
 const expenseActionRoutes=require('./routes/expenses');
 const purchaseRoutes = require('./routes/purchase')
 const premiumFeatureRoutes=require('./routes/premiumFeature');
+const forgotPasswordRoutes=require('./routes/resetPassword');
 
 
 app.use(authActionsRoutes);
 app.use(expenseActionRoutes);
 app.use('/purchase', purchaseRoutes);
 app.use('/premium',premiumFeatureRoutes);
+app.use('/password',forgotPasswordRoutes);
 
 User.hasMany(UserExpenses);
 UserExpenses.belongsTo(User);
 
 User.hasMany(Order);
 Order.belongsTo(User);
+
+User.hasMany(Forgotpassword);
+Forgotpassword.belongsTo(User);
 
 sequelize
 .sync()
