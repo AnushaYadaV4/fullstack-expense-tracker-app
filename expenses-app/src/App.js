@@ -8,8 +8,6 @@ import { useSelector } from 'react-redux';
 import Expenses from './components/pages/expenses/Expenses';
 import ShowingLeaderBoard from './components/pages/leaderboard/ShowingLeaderBoard';
 import ForgotPassword from './components/pages/forgotPassword/ForgotPassword';
-import Header from './components/pages/Layout/Header';
-
 
 function App() {
     //const leaderBoardArray=useSelector((state)=>state.leaderBoard.leaderboardArr);
@@ -32,7 +30,7 @@ function App() {
       
           <Route exact path="/expenses">
             {
-              user ? <div><ExpensesForm /> <Header/></div> : <Login setLoginUser={setLoginUser}/>
+              user ? <ExpensesForm /> : <Login setLoginUser={setLoginUser}/>
             }
           </Route>
 
