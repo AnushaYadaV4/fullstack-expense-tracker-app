@@ -9,19 +9,10 @@ import classes from "./Auth.module.css";
 import "./ExpensesForm.css";
 import { useHistory } from "react-router-dom";
 import Expenses from './Expenses';
-import Button from "react-bootstrap/esm/Button";
-import ShowingLeaderBoard from '../leaderboard/ShowingLeaderBoard';
-import { leaderboardAction } from '../../../store/leaderboard-reducer';
 
 
 
 const ExpensesForm = () => {
-
-  //const {setShowComponent}=prop
-
-  const history = useHistory();
-  const [showComponent, setShowComponent] = useState(false);
-  const [leaderboardArray, setLeaderboardArray] = useState([])
 
   const [isPremium, setIsPremium] = useState(false);
 
@@ -29,9 +20,10 @@ const ExpensesForm = () => {
   const [isEditId, setIsEditId] = useState(null);
   const dispatch = useDispatch();
   const expenseArr = useSelector((state) => state.expense.expenses);
-  //const token=useSelector((state)=>state.auth.token)
+  console.log("HEY MAN YOUR EXPENSES",expenses);
+  console.log("USE SELECTOR STATE HELLO IM HERE EXPENSE ARR", expenseArr);
 
-  //console.log("TOKEN from backend",token)
+  
   const token = localStorage.getItem('token');
   console.log("TOKENNN", token);
 
@@ -50,7 +42,7 @@ const ExpensesForm = () => {
     return JSON.parse(jsonPayload);
   }
 
-function loadScript(src) {
+  function loadScript(src) {
     return new Promise((resolve) => {
       const script = document.createElement("script");
       script.src = src;
@@ -113,9 +105,9 @@ function loadScript(src) {
 
     })
 
-}
+  }
 
-useEffect(() => {
+  useEffect(() => {
     console.log("inside token", token);
     console.log("getting expenses")
 
@@ -129,8 +121,10 @@ useEffect(() => {
 
     axios.get('http://localhost:5000/getexpenses', { headers: { "Authorization": token } })
       .then(arr => {
-        console.log("ARRRRRR", arr)
+        console.log("GETTING EXP ARRRRRR", arr)
         setExpenses(arr.data.expenses)
+        dispatch(expenseAction.gettingAllExpense(arr.data.expenses))
+
       })
 
   }, [dispatch])
@@ -146,7 +140,7 @@ useEffect(() => {
     setIsEditId(data.id);
   };
 
-const deleteButtonHandler = (id) => {
+  const deleteButtonHandler = (id) => {
     axios.delete(`http://localhost:5000/deleteexpense/${id}`, { headers: { 'Authorization': token } }).then(arr => setExpenses(arr.data))
   }
 
@@ -174,14 +168,21 @@ const deleteButtonHandler = (id) => {
       if (isEditId === null) {
         console.log("post");
         const resData = (res) => {
-          const expenseObjWithId = { ...expenseObj, Id: res.data.name };
+          console.log("RESSSSSSSSSSSS", res)
+          const expenseObjWithId = { ...expenseObj, Id: res.id };
           dispatch(expenseAction.addingNewExpense(expenseObjWithId));
         };
         console.log("POST TOKEN", token)
 
 
 
-        axios.post('http://localhost:5000/addexpense', expenseObj, { headers: { 'Authorization': token } }).then(arr => { setExpenses(arr.data) });
+        axios.post('http://localhost:5000/addexpense', expenseObj, { headers: { 'Authorization': token } }).then(arr => {
+          console.log("ARRay", arr)
+          setExpenses(arr.data);
+          console.log("arr data expense",arr.data.expense)
+          resData(arr.data.expense);
+
+        });
 
 
       } else {
@@ -191,7 +192,11 @@ const deleteButtonHandler = (id) => {
           setIsEditId(null);
         };
 
-        axios.post(`http://localhost:5000/editexpenses/${isEditId}`, expenseObj, { headers: { 'Authorization': token } }).then(arr => setExpenses(arr.data));
+        axios.post(`http://localhost:5000/editexpenses/${isEditId}`, expenseObj, { headers: { 'Authorization': token } }).then((arr) => {
+          setExpenses(arr.data);
+          resEditData(arr.data);
+
+        })
       }
     }
 
@@ -203,26 +208,10 @@ const deleteButtonHandler = (id) => {
 
 
 
-  useEffect(() => {
-    axios.get("http://localhost:5000/premium/showLeaderBoard", { headers: { "Authorization": token } })
-      .then(userLeaderBoardArray => {
-        console.log("ARRRRRR", userLeaderBoardArray)
-        dispatch(leaderboardAction.leaderboardData(userLeaderBoardArray.data))
-        setLeaderboardArray(userLeaderBoardArray.data)
-        //setExpenses(arr.data.)
-      })
-
-  }, [dispatch]);
-
   
 
-  const showLeaderboard = () => {
-    setShowComponent(true);
-    //history.push("/leaderboard")
-
-
-  }
- return (
+  
+  return (
     <Fragment>
       <div>
 
@@ -245,9 +234,8 @@ const deleteButtonHandler = (id) => {
           <button onClick={addExpenseHandler}>Submit</button>
           {isPremium ? <h3 className='premium-user'>You are a premium user</h3> : <button onClick={displayRazorpay} id='rzp-button1' type="button" class="btn btn-warning premiumbutton">Buy Premium</button>}
 
-          <button onClick={showLeaderboard} type="button" class="btn btn-warning premiumbutton">Show Leaderboard</button>
+        
 
-          <div className="button" onClick={() => history.push("/login")} >Logout</div>
 
         </form>
 
@@ -280,22 +268,8 @@ const deleteButtonHandler = (id) => {
           })}
       </section>
 
-      {showComponent ? <section className='bg-container'>
-        <h2>Leader Board</h2>
-
-        {Array.from(leaderboardArray).map((obj) => {
-          return (
-            <ShowingLeaderBoard
-              key={Math.random()}
-              items={obj}
-
-            />
-          );
-        })
-        }
-      </section> : " "}
-
-</Fragment>
+      
+    </Fragment>
   )
 }
 

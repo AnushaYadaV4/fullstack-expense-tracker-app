@@ -1,6 +1,34 @@
 const UserExpenses = require('../models/userexpenses');
 const User = require('../models/users');
 const sequelize = require('../helper/database');
+const UserServices=require('../services/userservices');
+const S3Service=require('../services/S3Services');
+
+
+const downloadexpenses=async(req,res)=>{
+    try{
+
+        const expenses=await UserExpenses.findAll({ where: { userId: req.user.id } })
+        //const expenses=await req.user.getexpenses();
+        console.log("EXPENSESssss",expenses);
+        const stringfiedExpenses=JSON.stringify(expenses);
+        console.log("STRINGFIED EXPENSES",stringfiedExpenses)
+        const userId=req.user.id;
+        console.log("USER ID",userId)
+        const filename=`Expense${userId}/${new Date()}.txt`;
+        console.log("FILE NAME",filename)
+        const fileURL=await S3Service.uploadToS3(stringfiedExpenses,filename);
+        console.log("FILEURL",fileURL);
+        res.status(200).json({fileURL,success:true});
+
+    }catch(err){
+
+        console.log("ERROR",err);
+        res.status(500).json({fileURL: '',success:false,err:err})
+    }
+}
+
+
 
 const addexpense = async (req, res) => {
     const t = await sequelize.transaction();
@@ -104,7 +132,8 @@ module.exports = {
     deleteexpense,
     getexpenses,
     addexpense,
-    editexpenses
+    editexpenses,
+    downloadexpenses
 }
 
 

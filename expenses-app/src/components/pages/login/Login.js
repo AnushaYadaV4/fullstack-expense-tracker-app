@@ -8,7 +8,6 @@ import { authAction } from "../../../store/auth-reducer";
 import SignUp from "../signup/SignUp";
 
 const Login = ({ setLoginUser}) => {
-    const [isLogin, setIsLogin] = useState(false);
 
     const history = useHistory();
     const dispatch=useDispatch()
@@ -42,7 +41,6 @@ console.log("getting token",token)
                 console.log("uff token",res.data.token);
                 localStorage.setItem('token',res.data.token);
                 setLoginUser(true)
-                setIsLogin(true)
                 history.push("/expenses")
             })
 
