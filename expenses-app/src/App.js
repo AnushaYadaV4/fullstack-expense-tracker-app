@@ -8,15 +8,25 @@ import { useSelector } from 'react-redux';
 import Expenses from './components/pages/expenses/Expenses';
 import ShowingLeaderBoard from './components/pages/leaderboard/ShowingLeaderBoard';
 import ForgotPassword from './components/pages/forgotPassword/ForgotPassword';
+import Header from './components/pages/Layout/Header';
 
 function App() {
     //const leaderBoardArray=useSelector((state)=>state.leaderBoard.leaderboardArr);
     //console.log("LBR",leaderBoardArray)
+    const userCurrentPageStatus=useSelector((state)=>state.userStatus.current);
+  console.log("APP USER CURRENT PAGE STATUS",userCurrentPageStatus)
 
 
-  const [ user, setLoginUser] = useState(false)
+  //const [ user, setLoginUser] = useState(false)
+   const user=useSelector((state)=>state.userStatus.status);
+   console.log("UFFFF USER AUTH",user)
+  
+
+  
+
   //const [showComponent,setShowComponent]=useState(false);
-  console.log("USERRRR",user)
+ 
+
 
   return (
     <div className="App">
@@ -28,9 +38,11 @@ function App() {
         <Switch>
 
       
-          <Route exact path="/expenses">
+          <Route path="/expenses">
+            { console.log("USERRRR",user)}
             {
-              user ? <ExpensesForm /> : <Login setLoginUser={setLoginUser}/>
+              
+              user ?<div><ExpensesForm /> <Header/></div>  : <Login/>
             }
           </Route>
 
@@ -38,8 +50,8 @@ function App() {
            
           
 
-          <Route path="/login">
-            <Login setLoginUser={setLoginUser}/>
+          <Route exact path="/login">
+            <Login/>
           </Route>
 
           

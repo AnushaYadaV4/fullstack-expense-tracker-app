@@ -19,6 +19,9 @@ const expenseSlice = createSlice({
       let filteredArr=state.expenses.filter((arr)=>arr.Id !==action.payload);
       state.expenses=filteredArr;
     },
+    gettingAllExpense(state,action){
+      state.expenses=[...state.expenses,action.payload]
+    }
     
   },
 });

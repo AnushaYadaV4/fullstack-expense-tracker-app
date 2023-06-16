@@ -8,6 +8,7 @@ import { useSelector } from "react-redux";
 
 const SignUp = () => {
 
+
     const history = useHistory()
     const token=useSelector((state)=>state.auth.token)
     console.log("getting signup token",token);
@@ -28,7 +29,8 @@ const SignUp = () => {
         })
     }
 
-    const register = () => {
+    const register = (event) => {
+        event.preventDefault();
         const { name, email, password, reEnterPassword } = user
         if( name && email && password && (password === reEnterPassword)){
             axios.post("http://localhost:5000/signup",user)

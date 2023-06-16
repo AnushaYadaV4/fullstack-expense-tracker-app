@@ -27,7 +27,8 @@ const authSlice=createSlice({
     {
       state.useremail='';
       localStorage.removeItem('ExpenseUserMail')
-    }
+    },
+    
   },
 });
 

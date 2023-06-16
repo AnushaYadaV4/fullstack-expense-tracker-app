@@ -12,12 +12,30 @@ import Expenses from './Expenses';
 import Button from "react-bootstrap/esm/Button";
 import ShowingLeaderBoard from '../leaderboard/ShowingLeaderBoard';
 import { leaderboardAction } from '../../../store/leaderboard-reducer';
+import Pagination from '../Layout/Pagination';
+import { authStatusAction } from '../../../store/authStatus-reducer';
+
+
+
+
+
 
 
 
 const ExpensesForm = () => {
 
+
   //const {setShowComponent}=prop
+  const userCurrentPageStatus = useSelector((state) => state.userStatus.current);
+  console.log("USER CURRENT PAGE STATUS", userCurrentPageStatus);
+  const [users, setUsers] = useState([]);
+  const [data, setData] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
+
+  const [perpage, setPerpage] = useState([])
+
 
   const history = useHistory();
   const [showComponent, setShowComponent] = useState(false);
@@ -50,7 +68,7 @@ const ExpensesForm = () => {
     return JSON.parse(jsonPayload);
   }
 
-function loadScript(src) {
+  function loadScript(src) {
     return new Promise((resolve) => {
       const script = document.createElement("script");
       script.src = src;
@@ -64,7 +82,9 @@ function loadScript(src) {
     });
   }
 
-  const displayRazorpay = async () => {
+  const displayRazorpay = async (event) => {
+    event.preventDefault();
+
     const res = await loadScript(
       "https://checkout.razorpay.com/v1/checkout.js"
     );
@@ -113,9 +133,9 @@ function loadScript(src) {
 
     })
 
-}
+  }
 
-useEffect(() => {
+  useEffect(() => {
     console.log("inside token", token);
     console.log("getting expenses")
 
@@ -127,13 +147,29 @@ useEffect(() => {
       setIsPremium(true);
     }
 
-    axios.get('http://localhost:5000/getexpenses', { headers: { "Authorization": token } })
+    axios.get('http://localhost:5000/getexpenses',
+      { headers: { "Authorization": token } },
+
+        /*{params: {
+          page: currentPage,
+          pageSize: 2, // Number of items per page
+        }
+      }*/)
       .then(arr => {
         console.log("ARRRRRR", arr)
-        setExpenses(arr.data.expenses)
+        //const { expenses: responseData, totalPages: responseTotalPages,offset:resOffset,limit:resLimit } = arr.data;
+
+
+
+
+        setExpenses(arr.data.expenses);
+
+        setPerpage(arr.data.expenses.slice(0, userCurrentPageStatus));
+
+        dispatch(expenseAction.gettingAllExpense(arr.data.expenses))
       })
 
-  }, [dispatch])
+  }, [currentPage])
   console.log("TOTAL EXPENSES", expenses);
 
 
@@ -146,7 +182,7 @@ useEffect(() => {
     setIsEditId(data.id);
   };
 
-const deleteButtonHandler = (id) => {
+  const deleteButtonHandler = (id) => {
     axios.delete(`http://localhost:5000/deleteexpense/${id}`, { headers: { 'Authorization': token } }).then(arr => setExpenses(arr.data))
   }
 
@@ -177,7 +213,7 @@ const deleteButtonHandler = (id) => {
           const expenseObjWithId = { ...expenseObj, Id: res.data.name };
           dispatch(expenseAction.addingNewExpense(expenseObjWithId));
         };
-        console.log("POST TOKEN", token)
+        console.log("POST TOKEN", token);
 
 
 
@@ -200,61 +236,70 @@ const deleteButtonHandler = (id) => {
     enteredCatRef.current.value = "";
   };
 
-
-
-
-  useEffect(() => {
-    axios.get("http://localhost:5000/premium/showLeaderBoard", { headers: { "Authorization": token } })
-      .then(userLeaderBoardArray => {
-        console.log("ARRRRRR", userLeaderBoardArray)
-        dispatch(leaderboardAction.leaderboardData(userLeaderBoardArray.data))
-        setLeaderboardArray(userLeaderBoardArray.data)
-        //setExpenses(arr.data.)
-      })
-
-  }, [dispatch]);
-
-  
-
-  const showLeaderboard = () => {
-    setShowComponent(true);
-    //history.push("/leaderboard")
-
+  const pageHandler = (pageNumber) => {
+    dispatch(authStatusAction.setPage(pageNumber));
+    console.log("PAGE NUMBERRRR", pageNumber);
+    console.log("SETTING CURRENT PAGE", userCurrentPageStatus)
+    setPerpage(expenses.slice(0, pageNumber * 1));
 
   }
- return (
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage((prevPage) => prevPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage((prevPage) => prevPage + 1);
+    }
+  };
+
+
+  return (
     <Fragment>
-      <div>
-
-        <form className="register">
-
-          <h1>Expenses Form</h1>
-          <label htmlFor="money">Amount</label>
-          <input ref={enteredAmountRef} type="number" id="money"></input>
-
-          <label htmlFor="expenses">Category</label>
-          <select ref={enteredCatRef} id="category">
-            <option value="grocery">Grocery</option>
-            <option value="fuel">Fuel</option>
-            <option value="medicine">Medicine</option>
-            <option value="Salary">Salary</option>
-            <option value="vegitables">Vegitables</option>
-          </select>
-          <label htmlFor="description">Description</label>
-          <input ref={enteredDesRef} type="text" id="description"></input>
-          <button onClick={addExpenseHandler}>Submit</button>
-          {isPremium ? <h3 className='premium-user'>You are a premium user</h3> : <button onClick={displayRazorpay} id='rzp-button1' type="button" class="btn btn-warning premiumbutton">Buy Premium</button>}
-
-          <button onClick={showLeaderboard} type="button" class="btn btn-warning premiumbutton">Show Leaderboard</button>
-
-          <div className="button" onClick={() => history.push("/login")} >Logout</div>
-
-        </form>
 
 
-      </div>
+      <form className="register">
+
+
+        <h1>Expenses Form</h1>
+        <label htmlFor="money">Amount</label>
+        <input ref={enteredAmountRef} type="number" id="money"></input>
+
+        <label htmlFor="expenses">Category</label>
+        <select ref={enteredCatRef} id="category">
+          <option value="grocery">Grocery</option>
+          <option value="fuel">Fuel</option>
+          <option value="medicine">Medicine</option>
+          <option value="Salary">Salary</option>
+          <option value="vegitables">Vegitables</option>
+        </select>
+        <label htmlFor="description">Description</label>
+        <input ref={enteredDesRef} type="text" id="description"></input>
+        <button onClick={addExpenseHandler}>Submit</button>
+        {isPremium ? <h3 className='premium-user'>You are a premium user</h3> : <button onClick={displayRazorpay} id='rzp-button1' type="button" class="btn btn-warning premiumbutton">Buy Premium</button>}
+
+
+
+      </form>
+
+
+
 
       <section className='bg-container'>
+        <div>
+          <button onClick={handlePrevPage} disabled={currentPage === 1}>
+            Previous Page
+          </button>
+          <span>{currentPage}</span>
+          <button onClick={handleNextPage} disabled={currentPage === totalPages}>
+            Next Page
+          </button>
+        </div>
+
+        <Pagination data={expenses} pageHandler={pageHandler} />
         <h1>Your Expenses</h1>
         {console.log("EXPENSES AMOUNT", expenses.amount)}
         {console.log("EXPENSES CATEGORY", expenses.category)}
@@ -267,8 +312,8 @@ const deleteButtonHandler = (id) => {
         {console.log("USER EXPENSES", expenses)}
 
 
-        {Array.from(expenses).length > 0 &&
-          Array.from(expenses).map((obj) => {
+        {Array.from(perpage).length > 0 &&
+          Array.from(perpage).map((obj) => {
             return (
               <Expenses
                 key={Math.random()}
@@ -279,6 +324,7 @@ const deleteButtonHandler = (id) => {
             );
           })}
       </section>
+
 
       {showComponent ? <section className='bg-container'>
         <h2>Leader Board</h2>
@@ -293,9 +339,12 @@ const deleteButtonHandler = (id) => {
           );
         })
         }
+
+
       </section> : " "}
 
-</Fragment>
+
+    </Fragment>
   )
 }
 

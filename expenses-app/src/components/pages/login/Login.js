@@ -1,4 +1,4 @@
-import React, {useState} from "react"
+import React, {useEffect, useState} from "react"
 import "./login.css"
 import axios from "axios"
 import { useHistory } from "react-router-dom";
@@ -6,8 +6,11 @@ import { useDispatch,useSelector } from "react-redux";
 
 import { authAction } from "../../../store/auth-reducer";
 import SignUp from "../signup/SignUp";
+import { authStatusAction } from "../../../store/authStatus-reducer";
 
-const Login = ({ setLoginUser}) => {
+let user;
+
+const Login = ({ setLoginUser,e}) => {
     const [isLogin, setIsLogin] = useState(false);
 
     const history = useHistory();
@@ -15,6 +18,11 @@ const Login = ({ setLoginUser}) => {
     const token=useSelector((state)=>state.auth.token)
 console.log("getting token",token)
 
+/*useEffect(()=>{
+    window.localStorage.setItem('user',true);
+    
+})
+*/
     const [ user, setUser] = useState({
         email:"",
         password:""
@@ -28,7 +36,8 @@ console.log("getting token",token)
         })
     }
 
-    const login = () => {
+    const login = (event) => {
+        event.preventDefault();
         
         const { email, password } = user
         if(email && password){
@@ -37,13 +46,18 @@ console.log("getting token",token)
                 console.log("RESSS",res)
                 dispatch(authAction.getExpenseToken(res.data.token))
         dispatch(authAction.setUserEmail(email))
+        dispatch(authStatusAction.setUserStatus(true))
+
                 alert(res.data.message)
                 console.log("response data",res.data)
                 console.log("uff token",res.data.token);
                 localStorage.setItem('token',res.data.token);
-                setLoginUser(true)
+                //localStorage.setItem('user',true);
+                //let userState=localStorage.getItem('userStatus')
+                //console.log("USER STATE",userState);
+                //setLoginUser(userState);
                 setIsLogin(true)
-                history.push("/expenses")
+                history.push("/expenses");
             })
 
         }else{
