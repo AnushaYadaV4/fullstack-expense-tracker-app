@@ -20,13 +20,13 @@ const authSlice=createSlice({
       let email1=action.payload.replace('.','');
       let email2=email1.replace('@','');
       state.useremail=email2;
-      localStorage.setItem('ExpenseUserMail',email2)
+      localStorage.setItem('ExpenseUserMail',email2);
       
     },
     removeUserEmail(state)
     {
       state.useremail='';
-      localStorage.removeItem('ExpenseUserMail')
+      localStorage.removeItem('ExpenseUserMail');
     },
     
   },

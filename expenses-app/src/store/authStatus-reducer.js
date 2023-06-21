@@ -25,8 +25,6 @@ const authStatusSlice=createSlice({
       localStorage.setItem("userpage",currentPage);
 
     }
-
-    
   },
 });
 

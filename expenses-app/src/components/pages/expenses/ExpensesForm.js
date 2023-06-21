@@ -7,13 +7,15 @@ import { useDispatch, useSelector } from 'react-redux';
 import Card from './Card';
 import classes from "./Auth.module.css";
 import "./ExpensesForm.css";
-import { useHistory } from "react-router-dom";
+
 import Expenses from './Expenses';
-import Button from "react-bootstrap/esm/Button";
+
 import ShowingLeaderBoard from '../leaderboard/ShowingLeaderBoard';
 import { leaderboardAction } from '../../../store/leaderboard-reducer';
-import Pagination from '../Layout/Pagination';
+
 import { authStatusAction } from '../../../store/authStatus-reducer';
+import Pagination from '../Layout/Pagination';
+
 
 
 
@@ -25,19 +27,24 @@ import { authStatusAction } from '../../../store/authStatus-reducer';
 const ExpensesForm = () => {
 
 
-  //const {setShowComponent}=prop
+
   const userCurrentPageStatus = useSelector((state) => state.userStatus.current);
   console.log("USER CURRENT PAGE STATUS", userCurrentPageStatus);
-  const [users, setUsers] = useState([]);
-  const [data, setData] = useState([]);
+
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
+
+  const [currentItems, setCurrentItems] = useState([])
+  const [itemsPerPage, setitemsPerPage] = useState(5);
+
+  const [pageNumberLimit, setpageNumberLimit] = useState(5);
+  const [maxPageNumberLimit, setmaxPageNumberLimit] = useState(5);
+  const [minPageNumberLimit, setminPageNumberLimit] = useState(0);
 
 
   const [perpage, setPerpage] = useState([])
 
 
-  const history = useHistory();
+
   const [showComponent, setShowComponent] = useState(false);
   const [leaderboardArray, setLeaderboardArray] = useState([])
 
@@ -48,6 +55,12 @@ const ExpensesForm = () => {
   const dispatch = useDispatch();
   const expenseArr = useSelector((state) => state.expense.expenses);
   //const token=useSelector((state)=>state.auth.token)
+
+
+  const getData = (data) => {
+    console.log(data)
+
+  }
 
   //console.log("TOKEN from backend",token)
   const token = localStorage.getItem('token');
@@ -126,9 +139,6 @@ const ExpensesForm = () => {
       console.log(response);
       alert("something went wrong")
 
-      //localStorage.setItem('ispremiumuser',true);
-      //setIsPremium(false)
-
 
 
     })
@@ -150,26 +160,29 @@ const ExpensesForm = () => {
     axios.get('http://localhost:5000/getexpenses',
       { headers: { "Authorization": token } },
 
-        /*{params: {
+      {
+        params: {
           page: currentPage,
-          pageSize: 2, // Number of items per page
+          limit: 2, // Number of items per page
         }
-      }*/)
+      })
       .then(arr => {
         console.log("ARRRRRR", arr)
         //const { expenses: responseData, totalPages: responseTotalPages,offset:resOffset,limit:resLimit } = arr.data;
-
-
-
-
         setExpenses(arr.data.expenses);
+        setCurrentItems(arr.data.currentItems);
+        console.log("------------------------------")
+        console.log("GETTING TOTAL EXPENSES", arr.data.currentItems)
+        console.log("------------------------------------------------------------")
+
+        console.log("TOTAL PAGES length", arr.data.totalItems);
 
         setPerpage(arr.data.expenses.slice(0, userCurrentPageStatus));
 
-        dispatch(expenseAction.gettingAllExpense(arr.data.expenses))
+
       })
 
-  }, [currentPage])
+  }, [])
   console.log("TOTAL EXPENSES", expenses);
 
 
@@ -236,26 +249,72 @@ const ExpensesForm = () => {
     enteredCatRef.current.value = "";
   };
 
-  const pageHandler = (pageNumber) => {
-    dispatch(authStatusAction.setPage(pageNumber));
-    console.log("PAGE NUMBERRRR", pageNumber);
-    console.log("SETTING CURRENT PAGE", userCurrentPageStatus)
-    setPerpage(expenses.slice(0, pageNumber * 1));
+
+  const handleClick = (event) => {
+    dispatch(authStatusAction.setPage(event));
+    console.log("EVENTTTTTT", event)
+    console.log("EVENT TARGET", event.target)
+
+    setCurrentPage(Number(event));
+    setPerpage(expenses.slice(0, event * 1));
+
+
+    console.log("DO IM CALLING");
 
   }
 
-  const handlePrevPage = () => {
-    if (currentPage > 1) {
-      setCurrentPage((prevPage) => prevPage - 1);
+  const handleNextbtn = (event) => {
+    console.log("handle next event", event);
+    console.log("current page in handle next", currentPage)
+    setCurrentPage(Number(currentPage) + 1);
+    dispatch(authStatusAction.setPage(currentPage + 1));
+
+    setPerpage(expenses.slice(0, currentPage + 1));
+    console.log("after dispatch current page is", currentPage)
+
+
+    if (currentPage + 1 > maxPageNumberLimit) {
+
+      setmaxPageNumberLimit(maxPageNumberLimit + pageNumberLimit);
+      setminPageNumberLimit(minPageNumberLimit + pageNumberLimit);
+
     }
   };
 
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-      setCurrentPage((prevPage) => prevPage + 1);
+  const handlePrevbtn = () => {
+    setCurrentPage(Number(currentPage) - 1);
+
+    dispatch(authStatusAction.setPage(currentPage - 1));
+
+    setPerpage(expenses.slice(0, currentPage - 1));
+
+
+
+
+    if ((currentPage - 1) % pageNumberLimit == 0) {
+
+
+      setmaxPageNumberLimit(maxPageNumberLimit - pageNumberLimit);
+      setminPageNumberLimit(minPageNumberLimit - pageNumberLimit);
     }
   };
 
+  let pageIncrementBtn = null;
+  if (expenses.length > maxPageNumberLimit) {
+    pageIncrementBtn = <li onClick={handleNextbtn}> &hellip; </li>;
+  }
+
+  let pageDecrementBtn = null;
+  if (minPageNumberLimit >= 1) {
+    pageDecrementBtn = <li onClick={handlePrevbtn}> &hellip; </li>;
+  }
+
+  const handleLoadMore = () => {
+    setitemsPerPage(itemsPerPage + 5);
+
+    setPerpage(expenses.slice(0, itemsPerPage));
+
+  };
 
   return (
     <Fragment>
@@ -289,17 +348,11 @@ const ExpensesForm = () => {
 
 
       <section className='bg-container'>
-        <div>
-          <button onClick={handlePrevPage} disabled={currentPage === 1}>
-            Previous Page
-          </button>
-          <span>{currentPage}</span>
-          <button onClick={handleNextPage} disabled={currentPage === totalPages}>
-            Next Page
-          </button>
-        </div>
 
-        <Pagination data={expenses} pageHandler={pageHandler} />
+
+
+        <Pagination handleLoadMore={handleLoadMore} pageIncrementBtn={pageIncrementBtn} pageDecrementBtn={pageDecrementBtn} getData={getData} data={expenses} onHandleClick={handleClick} currentPage={currentPage} handleNextbtn={handleNextbtn} handlePrevbtn={handlePrevbtn} max={maxPageNumberLimit} min={minPageNumberLimit} />
+
         <h1>Your Expenses</h1>
         {console.log("EXPENSES AMOUNT", expenses.amount)}
         {console.log("EXPENSES CATEGORY", expenses.category)}

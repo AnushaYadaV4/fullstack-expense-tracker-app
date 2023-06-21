@@ -67,7 +67,43 @@ const addexpense = async (req, res) => {
 //const ITEMS_PER_PAGE=10
 
 const getexpenses = async (req, res) => {
-    console.log("USER", req.user)
+    const currentPage = parseInt(req.query.currentPage)||1; // Get the requested page number from query parameters
+  const limit = parseInt(req.query.limit)||5; // Get the requested page limit from query parameters
+  console.log("CURRENT PAGE",currentPage);
+  console.log("LIMIT",limit)
+
+  // Calculate the start and end indices based on the page and limit
+  const indexOfLastItem = currentPage * limit;
+  console.log("INDEX OF LAST",indexOfLastItem);
+  const indexOfFirstItem = indexOfLastItem-limit;
+  console.log("INDEX OF FIRST",indexOfLastItem);
+
+  // Slice the data array to get the items for the requested page
+  
+
+
+    try{
+        const expenses=await UserExpenses.findAll({ where: { userId: req.user.id }})
+        console.log("ITEMSSS------------------------------------------------------------------------------",expenses.length)
+        const currentItems = expenses.slice(indexOfFirstItem,indexOfLastItem);
+        console.log("current ITEMS----------*-----------------****",currentItems.length)
+
+        return res.json({
+            expenses:expenses,
+            currentItems:currentItems,
+            indexOfFirstItem:indexOfFirstItem,
+            indexOfLastItem:indexOfLastItem,
+          });
+        
+
+
+
+    }catch(err){
+        console.log(err)
+        return res.status(500).json({ error: err, success: false })
+
+    }
+    /*console.log("USER", req.user)
     const page = parseInt(req.query.page) || 1; // Current page number
     const pageSize = parseInt(req.query.pageSize) || 2
     ; // Number of items per page
@@ -118,9 +154,10 @@ const getexpenses = async (req, res) => {
 
                 })
             })
-            */
+            
        
         //return res.status(200).json({expenses, success: true })
+    
         
     }catch(err){
          console.log(err)
@@ -129,7 +166,7 @@ const getexpenses = async (req, res) => {
     }
 
 
-  
+  */
     
     
 }
